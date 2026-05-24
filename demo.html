@@ -1,0 +1,534 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Universal File Uploader V3 Demo</title>
+    <style>
+      :root {
+        --bg: #f8fafc;
+        --panel: #ffffff;
+        --text: #111827;
+        --muted: #64748b;
+        --border: #dbe3ef;
+        --accent: #2563eb;
+        --good: #15803d;
+        --bad: #dc2626;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        min-height: 100vh;
+        margin: 0;
+        background: var(--bg);
+        color: var(--text);
+        font-family:
+          Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+          "Segoe UI", sans-serif;
+      }
+
+      main {
+        width: min(1180px, calc(100% - 32px));
+        margin: 34px auto 56px;
+      }
+
+      h1 {
+        margin: 0 0 8px;
+        font-size: clamp(1.8rem, 3vw, 2.7rem);
+        line-height: 1.08;
+      }
+
+      h2 {
+        margin: 0 0 12px;
+        font-size: 1.05rem;
+      }
+
+      p {
+        margin: 0;
+        color: var(--muted);
+        line-height: 1.55;
+      }
+
+      .intro,
+      .panel,
+      .metrics,
+      .workspace {
+        margin-bottom: 16px;
+      }
+
+      .workspace {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) 360px;
+        gap: 16px;
+        align-items: start;
+      }
+
+      .panel {
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        background: var(--panel);
+        padding: 16px;
+      }
+
+      .metrics {
+        display: grid;
+        grid-template-columns: repeat(5, minmax(0, 1fr));
+        gap: 10px;
+      }
+
+      .metric {
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        background: var(--panel);
+        padding: 12px;
+      }
+
+      .metric strong {
+        display: block;
+        margin-bottom: 4px;
+        font-size: 1.08rem;
+      }
+
+      .metric span {
+        color: var(--muted);
+        font-size: 0.8rem;
+      }
+
+      .controls {
+        display: grid;
+        gap: 12px;
+      }
+
+      .control-grid,
+      .button-row {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 8px;
+      }
+
+      label {
+        display: grid;
+        gap: 6px;
+        color: var(--muted);
+        font-size: 0.82rem;
+        font-weight: 700;
+      }
+
+      select,
+      button {
+        min-height: 38px;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        background: #ffffff;
+        color: var(--text);
+        padding: 0 10px;
+        cursor: pointer;
+        font: inherit;
+      }
+
+      button {
+        font-weight: 700;
+      }
+
+      select:focus-visible,
+      button:focus-visible,
+      button:hover {
+        border-color: var(--accent);
+        outline: none;
+      }
+
+      output {
+        display: block;
+        min-height: 220px;
+        max-height: 420px;
+        overflow: auto;
+        white-space: pre-wrap;
+        word-break: break-word;
+        color: #334155;
+        font:
+          0.8rem/1.45 ui-monospace, SFMono-Regular, Menlo, Consolas,
+          monospace;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        overflow: hidden;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        background: var(--panel);
+      }
+
+      th,
+      td {
+        padding: 10px;
+        border-bottom: 1px solid var(--border);
+        text-align: left;
+        vertical-align: top;
+        font-size: 0.88rem;
+      }
+
+      th {
+        background: #f1f5f9;
+        font-size: 0.76rem;
+        text-transform: uppercase;
+      }
+
+      tr:last-child td {
+        border-bottom: 0;
+      }
+
+      .yes {
+        color: var(--good);
+        font-weight: 800;
+      }
+
+      .no {
+        color: var(--bad);
+        font-weight: 800;
+      }
+
+      @media (max-width: 900px) {
+        .workspace,
+        .metrics,
+        .control-grid,
+        .button-row {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <section class="intro">
+        <h1>Universal File Uploader V3</h1>
+        <p>Local-first uploader with trust reports, benchmark reports, resumable chunk manifests, presets, and headless mode.</p>
+      </section>
+
+      <section class="workspace">
+        <div>
+          <universal-file-uploader
+            id="uploader"
+            preset="strict"
+            max-files="6"
+            max-total-size="18MB"
+            output-format="auto"
+            image-max-width="1600"
+            image-max-height="1200"
+            image-quality="0.78"
+            report-level="full"
+            show-report
+            multiple
+            reorderable
+            hash-chunks
+            resume-uploads
+            persist-session="universal-uploader-v3-demo"
+          ></universal-file-uploader>
+
+          <universal-file-uploader id="headless-uploader" headless preset="images"></universal-file-uploader>
+
+          <div class="metrics" aria-live="polite">
+            <div class="metric"><strong id="metric-count">0</strong><span>ready files</span></div>
+            <div class="metric"><strong id="metric-total">0 B</strong><span>final size</span></div>
+            <div class="metric"><strong id="metric-saved">0%</strong><span>average saved</span></div>
+            <div class="metric"><strong id="metric-trust">none</strong><span>trust state</span></div>
+            <div class="metric"><strong id="metric-status">Ready</strong><span>last status</span></div>
+          </div>
+
+          <section class="panel">
+            <h2>Live payload</h2>
+            <output id="log">Ready</output>
+          </section>
+        </div>
+
+        <aside class="panel controls">
+          <h2>V3 scenarios</h2>
+          <div class="control-grid">
+            <label>
+              View
+              <select id="view">
+                <option value="list">List</option>
+                <option value="grid">Grid</option>
+                <option value="compact">Compact</option>
+              </select>
+            </label>
+            <label>
+              Policy
+              <select id="policy">
+                <option value="reject">Reject risky</option>
+                <option value="warn">Warn risky</option>
+                <option value="allow">Allow risky</option>
+              </select>
+            </label>
+            <label>
+              Preset
+              <select id="preset">
+                <option value="strict">Strict</option>
+                <option value="images">Images</option>
+                <option value="documents">Documents</option>
+              </select>
+            </label>
+            <label>
+              Transport
+              <select id="transport">
+                <option value="none">None</option>
+                <option value="mock">Mock direct</option>
+                <option value="adapter">Mock resumable adapter</option>
+              </select>
+            </label>
+          </div>
+
+          <div class="button-row">
+            <button id="sample-image" type="button">Large image</button>
+            <button id="sample-pdf" type="button">PDF</button>
+            <button id="sample-invalid" type="button">Spoofed JPG</button>
+            <button id="sample-svg" type="button">Risky SVG</button>
+            <button id="sample-oversized" type="button">Oversized PDF</button>
+            <button id="headless-test" type="button">Headless add</button>
+            <button id="upload-ready" type="button">Upload ready</button>
+            <button id="clear" type="button">Clear</button>
+          </div>
+        </aside>
+      </section>
+
+      <section class="panel">
+        <h2>Why not just Uppy, FilePond, Dropzone, react-dropzone, or Uploadcare?</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Need</th>
+              <th>Universal V3</th>
+              <th>Common alternative</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Small app-owned uploader</td>
+              <td class="yes">Single dependency-free Web Component</td>
+              <td>Uppy/Uploadcare are broader platforms</td>
+            </tr>
+            <tr>
+              <td>Trust reporting before upload</td>
+              <td class="yes">Declared vs detected type, risk flags, warnings</td>
+              <td>Usually custom backend or plugin work</td>
+            </tr>
+            <tr>
+              <td>Image optimization without plugins</td>
+              <td class="yes">Canvas WebP/AVIF auto mode plus variants</td>
+              <td>FilePond/Uppy need image plugins</td>
+            </tr>
+            <tr>
+              <td>Headless custom UI</td>
+              <td class="yes">`headless` mode with same events</td>
+              <td>react-dropzone is headless but not an uploader</td>
+            </tr>
+            <tr>
+              <td>Hosted cloud/social sources</td>
+              <td class="no">Intentionally out of scope</td>
+              <td>Uploadcare/Uppy are better fits</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+    </main>
+
+    <script type="module">
+      const boot = async () => {
+      await import("./universal-file-uploader.js?v=3");
+
+      const uploader = document.querySelector("#uploader");
+      const headless = document.querySelector("#headless-uploader");
+      const log = document.querySelector("#log");
+      const metrics = {
+        count: document.querySelector("#metric-count"),
+        total: document.querySelector("#metric-total"),
+        saved: document.querySelector("#metric-saved"),
+        trust: document.querySelector("#metric-trust"),
+        status: document.querySelector("#metric-status"),
+      };
+
+      uploader.variants = [
+        { name: "thumb", maxWidth: 320, maxHeight: 320, quality: 0.72, outputFormat: "webp" },
+      ];
+
+      function bytes(value) {
+        if (!value) return "0 B";
+        const units = ["B", "KB", "MB", "GB"];
+        const index = Math.min(Math.floor(Math.log(value) / Math.log(1024)), units.length - 1);
+        return `${(value / 1024 ** index).toFixed(index ? 1 : 0)} ${units[index]}`;
+      }
+
+      function clean(value) {
+        return JSON.stringify(value, (key, current) => {
+          if (current instanceof File) {
+            return { name: current.name, size: current.size, type: current.type };
+          }
+          if (key === "component" || key === "cause") return undefined;
+          return current;
+        }, 2);
+      }
+
+      function summarize(payload, label) {
+        const items = uploader.items.filter((item) => item.status === "ready" || item.status === "success");
+        const allItems = uploader.items;
+        const total = items.reduce((sum, item) => sum + item.file.size, 0);
+        const optimized = items.filter((item) => item.optimized);
+        const saved = optimized.length
+          ? optimized.reduce((sum, item) => sum + (1 - item.compressionRatio), 0) / optimized.length
+          : 0;
+        const trust = allItems.find((item) => item.trustReport)?.trustReport?.signatureStatus || "none";
+        metrics.count.textContent = String(items.length);
+        metrics.total.textContent = bytes(total);
+        metrics.saved.textContent = `${Math.max(0, Math.round(saved * 100))}%`;
+        metrics.trust.textContent = trust;
+        metrics.status.textContent = label;
+        log.value = clean(payload);
+      }
+
+      function directTransport() {
+        return async ({ file, onProgress, signal }) => {
+          for (let progress = 0; progress <= 100; progress += 20) {
+            if (signal.aborted) throw new DOMException("Aborted", "AbortError");
+            onProgress(progress);
+            await new Promise((resolve) => setTimeout(resolve, 120));
+          }
+          return { ok: true, mode: "direct", uploadedName: file.name, uploadedSize: file.size };
+        };
+      }
+
+      function resumableAdapter() {
+        return {
+          async start({ manifest }) {
+            return { resumeToken: manifest.resumeToken };
+          },
+          async resume({ manifest }) {
+            return { completedChunks: manifest.completedChunks };
+          },
+          async uploadChunk({ chunkIndex, chunkCount, chunkHash }) {
+            await new Promise((resolve) => setTimeout(resolve, 110));
+            return { ok: true, chunkIndex, chunkCount, chunkHash };
+          },
+          async complete({ manifest, responses }) {
+            return { ok: true, mode: "resumable-adapter", uploadId: manifest.uploadId, chunks: responses.length };
+          },
+        };
+      }
+
+      function syncTransport() {
+        const value = document.querySelector("#transport").value;
+        if (value === "mock") uploader.transport = directTransport();
+        else if (value === "adapter") uploader.transport = resumableAdapter();
+        else uploader.transport = "none";
+      }
+
+      uploader.onUploadSuccess = (payload) => summarize(payload, "Ready");
+      uploader.onUploadError = (payload) => summarize(payload, "Error");
+      uploader.onChange = (payload) => summarize(payload, "Changed");
+      uploader.onProgress = (payload) => summarize(payload, payload.status);
+      uploader.onUploadComplete = (payload) => summarize(payload, "Complete");
+      uploader.addEventListener("trust-report", (event) => summarize(event.detail, "Trust"));
+      uploader.addEventListener("benchmark-complete", (event) => summarize(event.detail, "Benchmark"));
+      uploader.addEventListener("chunk-complete", (event) => summarize(event.detail, "Chunk"));
+      uploader.addEventListener("upload-resume-ready", (event) => summarize(event.detail, "Resume ready"));
+
+      headless.onChange = (payload) => {
+        log.value = `Headless component accepted ${payload.items.length} file(s)\n\n${clean(payload)}`;
+      };
+
+      document.querySelector("#view").addEventListener("change", (event) => {
+        uploader.view = event.target.value;
+      });
+      document.querySelector("#policy").addEventListener("change", (event) => {
+        uploader.dangerousTypesPolicy = event.target.value;
+      });
+      document.querySelector("#preset").addEventListener("change", (event) => {
+        uploader.allowedTypes = [];
+        uploader.preset = event.target.value;
+      });
+      document.querySelector("#transport").addEventListener("change", syncTransport);
+
+      document.querySelector("#sample-image").addEventListener("click", async () => {
+        const canvas = document.createElement("canvas");
+        canvas.width = 2800;
+        canvas.height = 1800;
+        const context = canvas.getContext("2d");
+        const gradient = context.createLinearGradient(0, 0, canvas.width, canvas.height);
+        gradient.addColorStop(0, "#dbeafe");
+        gradient.addColorStop(0.5, "#bbf7d0");
+        gradient.addColorStop(1, "#fee2e2");
+        context.fillStyle = gradient;
+        context.fillRect(0, 0, canvas.width, canvas.height);
+        context.fillStyle = "#1d4ed8";
+        context.fillRect(180, 180, 980, 620);
+        context.fillStyle = "#15803d";
+        context.beginPath();
+        context.arc(1820, 860, 430, 0, Math.PI * 2);
+        context.fill();
+        context.fillStyle = "#111827";
+        context.font = "140px sans-serif";
+        context.fillText("V3 reports", 180, 1280);
+        const blob = await new Promise((resolve) => canvas.toBlob(resolve, "image/png", 0.98));
+        await uploader.addFiles([new File([blob], "sample-large.png", { type: "image/png" })]);
+      });
+
+      document.querySelector("#sample-pdf").addEventListener("click", async () => {
+        const pdf = "%PDF-1.4\n1 0 obj\n<< /Type /Catalog >>\nendobj\ntrailer\n<<>>\n%%EOF";
+        await uploader.addFiles([new File([pdf], "proposal.pdf", { type: "application/pdf" })]);
+      });
+
+      document.querySelector("#sample-invalid").addEventListener("click", async () => {
+        await uploader.addFiles([new File(["plain text pretending to be an image"], "spoof.jpg", { type: "image/jpeg" })]);
+      });
+
+      document.querySelector("#sample-svg").addEventListener("click", async () => {
+        uploader.allowedTypes = ["image/svg+xml", "image/jpeg", "image/png", "application/pdf"];
+        const svg = `<svg xmlns="http://www.w3.org/2000/svg"><script>alert("x")<\\/script><rect width="100" height="100"/></svg>`;
+        await uploader.addFiles([new File([svg], "risky.svg", { type: "image/svg+xml" })]);
+      });
+
+      document.querySelector("#sample-oversized").addEventListener("click", async () => {
+        const chunks = ["%PDF-1.4\n", "0".repeat(6 * 1024 * 1024), "\n%%EOF"];
+        await uploader.addFiles([new File(chunks, "oversized.pdf", { type: "application/pdf" })]);
+      });
+
+      document.querySelector("#headless-test").addEventListener("click", async () => {
+        const canvas = document.createElement("canvas");
+        canvas.width = 640;
+        canvas.height = 360;
+        const context = canvas.getContext("2d");
+        context.fillStyle = "#eff6ff";
+        context.fillRect(0, 0, canvas.width, canvas.height);
+        context.fillStyle = "#2563eb";
+        context.font = "48px sans-serif";
+        context.fillText("headless", 80, 190);
+        const blob = await new Promise((resolve) => canvas.toBlob(resolve, "image/png", 0.9));
+        await headless.addFiles([new File([blob], "headless.png", { type: "image/png" })]);
+      });
+
+      document.querySelector("#upload-ready").addEventListener("click", () => {
+        syncTransport();
+        uploader.upload();
+      });
+
+      document.querySelector("#clear").addEventListener("click", () => {
+        uploader.clear();
+        summarize({ message: "Cleared" }, "Ready");
+      });
+
+      syncTransport();
+      summarize({ message: "Ready" }, "Ready");
+      };
+
+      boot().catch((error) => {
+        const log = document.querySelector("#log");
+        if (log) {
+          log.value = `Demo boot failed: ${error.message}`;
+        }
+        throw error;
+      });
+    </script>
+  </body>
+</html>
